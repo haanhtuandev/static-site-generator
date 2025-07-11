@@ -149,9 +149,9 @@ def main():
     else:
         basepath = sys.argv[1]
 
-    clear_directory_contents("public/")
+    clear_directory_contents("docs/")
 
-    copy_source("static/", "public/")
+    copy_source("static/", "docs/")
 
     generate_pages_recursive("content", "template.html", "docs", basepath)
 
