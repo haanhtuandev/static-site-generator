@@ -25,7 +25,7 @@ class TextNode():
             case TextType.LINKS:
                 return LeafNode("a", self.text, {"href": self.url})
             case TextType.IMAGES:
-                return LeafNode("img", None, {"src": self.url, "alt": self.text})
+                return LeafNode("img", "", {"src": self.url, "alt": self.text})
             case _:
                 raise Exception
 

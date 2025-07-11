@@ -114,10 +114,8 @@ def markdown_to_html_node(markdown):
             #     node = node.text_node_to_html_node()
             final_children.append(ParentNode(tag, content))
         elif type == BlockType.PARAGRAPH:
-            print(f"block: {block}")
             processed = block.replace("\n", " ")
             content = list(map(lambda node : node.text_node_to_html_node(), text_to_textnodes(processed)))
-            print(f"processedblock: {block.lstrip().lstrip("\n").rstrip("\n")}")
             final_children.append(ParentNode("p", content))
         elif type == BlockType.UNORDERED_LIST:
             children = []
@@ -126,17 +124,22 @@ def markdown_to_html_node(markdown):
                 content = list(map(lambda node : node.text_node_to_html_node(), text_to_textnodes(line.lstrip("-").lstrip().replace("\n", " "))))
                 children.append(ParentNode("li" , content))
             final_children.append(ParentNode(tag, children))
+        elif type == BlockType.ORDERED_LIST:
+            children = []
+            tag = "ol"
+            for line in block.split("\n"):
+                content = list(map(lambda node : node.text_node_to_html_node(), text_to_textnodes(line[3:].replace("\n", " "))))
+                children.append(ParentNode("li" , content))
+            final_children.append(ParentNode(tag, children))
         elif type == BlockType.QUOTE:
             tag = "blockquote"
-            content = list(map(lambda node : node.text_node_to_html_node(), text_to_textnodes(block.lstrip(">").lstrip())))
+            content = list(map(lambda node : node.text_node_to_html_node(), text_to_textnodes(block.replace(">","").lstrip())))
             final_children.append(ParentNode(tag, content))
         elif type == BlockType.CODE:
-            print(f"Block: {block}")
             content = block.lstrip("```").rstrip("```").lstrip().rstrip() + "\n"
-            print(f"Stripped block: {content}")
-            
             final_children.append(ParentNode("pre", [LeafNode("code", content)]))
         else:
+            print("No match for: ", block)
             raise Exception("No matched type!")
     return ParentNode("div", final_children)
     
@@ -153,11 +156,13 @@ string = """
 print("original string: \n", string)
 string = string.replace("\n", "")
 print("Processsed:\n",string)
-#print((test.lstrip("```").rstrip("```").lstrip().rstrip()))
-# .lstrip("\n").rstrip("\n")
-# print("Function testing for md to html node")
-# print(markdown_to_html_node("## **heading** _test_  #"))
-# print(markdown_to_html_node("a b **aksd** ask _as_ ask"))
-# print(markdown_to_html_node(test))
 
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    for line in lines:
+        if line.startswith("#"):
+            return line.lstrip("#").lstrip()
+
+print(extract_title("#Hello          "))
 
