@@ -2,7 +2,7 @@ from textnode import *
 import os
 import shutil
 from convert_functions import *
-
+import sys
 def clear_directory_contents(path):
     for item in os.listdir(path):
         item_path = os.path.join(path, item)
@@ -60,7 +60,7 @@ def copy_source(path, dest):
 #         print(f"Error: The file '{template_path}' was not found.")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
     # Read Markdown content
@@ -91,8 +91,9 @@ def generate_page(from_path, template_path, dest_path):
         template
         .replace("{{ Title }}", title)
         .replace("{{ Content }}", html_string)
+        .replace('href="/', f'href="{base_path}')
+        .replace('src="/', f'src="{base_path}')
     )
-
     # Ensure destination directory exists
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
 
@@ -116,19 +117,19 @@ def generate_page(from_path, template_path, dest_path):
 #             generate_pages_recursive(item_path, template_path, dir_path)
 #         else:
 #             continue
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, base_path):
     for item in os.listdir(dir_path_content):
         item_path = os.path.join(dir_path_content, item)
         print(f"Current item path: {item_path}")
 
         if os.path.isfile(item_path) and item_path.endswith(".md"):
-            generate_page(item_path, template_path, dest_dir_path + "/index.html")
+            generate_page(item_path, template_path, dest_dir_path + "/index.html", base_path)
 
         elif os.path.isdir(item_path):
             dir_path = os.path.join(dest_dir_path, item)
             os.makedirs(dir_path, exist_ok=True)
 
-            generate_pages_recursive(item_path, template_path, dir_path)
+            generate_pages_recursive(item_path, template_path, dir_path, base_path)
 
 # def generate_pages_recursive(src_dir, template_path, dest_dir):
 #     for item in os.listdir(src_dir):
@@ -143,10 +144,15 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
 
 
 def main():
+    if len(sys.argv) < 2:
+        basepath = "/"
+    else:
+        basepath = sys.argv[1]
+
     clear_directory_contents("public/")
 
     copy_source("static/", "public/")
 
-    generate_pages_recursive("content", "template.html", "public")
+    generate_pages_recursive("content", "template.html", "docs", basepath)
 
 main()
